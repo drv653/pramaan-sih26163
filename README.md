@@ -6,6 +6,7 @@
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-pramaan--sih26163.vercel.app-0b2a4a?style=for-the-badge&logo=vercel)](https://pramaan-sih26163.vercel.app)
 [![Demo Video](https://img.shields.io/badge/Demo%20Video-YouTube-red?style=for-the-badge&logo=youtube)](https://www.youtube.com/watch?v=5EYjylzjHAI)
+[![CI](https://img.shields.io/github/actions/workflow/status/drv653/pramaan-sih26163/ci.yml?branch=main&label=CI%20Quality%20Gate&style=for-the-badge&logo=github-actions)](https://github.com/drv653/pramaan-sih26163/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
 [![Hackathon: SIH 2026](https://img.shields.io/badge/SIH%202026-SIH26163-orange?style=for-the-badge)](https://sih.gov.in)
 [![Status: Prototype](https://img.shields.io/badge/Status-Prototype%20(Interactive)-amber?style=for-the-badge)](#project-status)
