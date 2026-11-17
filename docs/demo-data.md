@@ -1,0 +1,127 @@
+# Demo Data Architecture & Schema Reference
+
+> **Important Honesty Notice:**
+> The findings, audit entries, and scan logs in `data.js` represent **illustrative demo data** designed to showcase the capabilities of the Pramaan assessment platform and validate the UI state machine. They are **not** real vulnerability discoveries against the upstream World Monitor project, and no vulnerability in any production deployment of World Monitor is being claimed.
+
+---
+
+## 1. Overview of `data.js`
+
+In the static prototype, `data.js` serves as the local state store simulating the backend database. It contains:
+1. `TARGET`: Metadata describing the assessment target and authorization context.
+2. `DOMAINS`: The seven SIH26163 assessment scope domains.
+3. `SURFACES`: Mapped attack surfaces of the target deployment.
+4. `FINDINGS`: Sample finding records spanning all result tiers.
+5. `IMPACT`: Business-impact templates mapped to the CIA triad.
+6. `AUDIT`: Simulated SHA-256 hash-chained audit log records.
+7. `RUN`: Plain-language live console events.
+8. `POSTURE`: Detailed breakdown of the 0–100 Security Posture Score.
+
+---
+
+## 2. Target Profile Schema (`TARGET`)
+
+```javascript
+var TARGET = {
+  name: "worldmonitor_local",       // Pinned target identifier
+  sha: "3f9a1c2",                  // Target Git commit SHA
+  version: "v1.4.0-lab",           // Application version string
+  until: "2026-10-02 14:00 IST",   // Authorization validity window expiration
+  untilShort: "02 Oct 14:00",      // Compact timestamp for headers
+  rate: "5 rps",                   // Enforced token-bucket rate cap
+  box: "30 min"                    // Enforced maximum scan duration
+};
+```
+
+---
+
+## 3. Finding Record Schema (`FINDINGS`)
+
+Every finding in `FINDINGS` models the data structure produced by the Validator and Risk Scorer:
+
+### Confirmed Finding (T1 / T1.5)
+
+```javascript
+{
+  id: "F-001",                                                // Unique identifier
+  title: "Outbound fetch lacks a destination allowlist",       // Mandatory 1: Title
+  domain: "D3",                                               // Domain ID (D1 through D7)
+  tier: "poc",                                                // Result tier: 'poc' | 'confirmed' | 'evidence'
+  sev: "critical",                                            // Severity bucket
+  cvss: 9.1,                                                  // Deterministic CVSS v3.1 score
+  vector: "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:L/A:N",     // Mandatory 4: CVSS vector string
+  component: "services/proxy/fetch.ts",                       // Mandatory 3: Affected component
+  cwe: ["CWE-918"],                                           // MITRE CWE mappings
+  owasp: ["A10:2021"],                                        // OWASP classification
+  cia: "C",                                                   // CIA impact key (maps to IMPACT)
+  now: 5,                                                     // State index (0=DETECTED .. 5=CLOSED)
+  full: true,                                                 // Mandatory fields complete flag
+  strategy: "canary",                                         // PoC strategy ('canary', 'header_proof', etc.)
+  script: "pramaan-poc-F001.py",                              // Replayable PoC script filename
+  fix: "Allowlist schemes and destination hosts...",           // Mandatory 8: Remediation guidance
+  closed: true,                                               // Closed after successful re-test
+  reg: "regress/F001_egress_test.py"                          // Automated regression test script
+}
+```
+
+### Probable / Not-Applicable / Verified-Clean Finding
+
+Unconfirmed results do not populate exploit scripts or CVSS vectors:
+
+```javascript
+// Not-Applicable (P8: Target Profile Reconciliation)
+{
+  id: "F-008",
+  title: "Role escalation",
+  domain: "D2",
+  tier: "na",
+  sev: null, cvss: null, vector: null,
+  component: "authorization model",
+  cwe: [], owasp: ["A01:2021"],
+  now: 1,
+  note: "The profiler reports has_roles = false and an anonymous signed session. With no roles to escalate, the check returns Not-applicable with the profile attached as evidence.",
+  fix: "No action. Re-run if a role system is added."
+}
+
+// Verified-Clean (Hardened baseline confirmed)
+{
+  id: "F-009",
+  title: "TLS configuration",
+  domain: "D6",
+  tier: "clean",
+  sev: null, cvss: null, vector: null,
+  component: "lab reverse proxy",
+  cwe: [], owasp: ["A02:2021"],
+  now: 2,
+  note: "Only TLS 1.2 and 1.3 offered, no weak ciphers, HSTS present. Executed and reported as a result, not left out.",
+  fix: "No action. Keep the cipher policy pinned and re-test on proxy changes."
+}
+```
+
+---
+
+## 4. Mandatory Deliverables Assembly
+
+The prototype dynamically constructs the remaining mandatory deliverables using standardized PRD templates:
+
+- **Technical Description:** Assembled by `descFor(finding)` combining the domain name, component location, commit SHA, and verification signals.
+- **Steps to Reproduce:** Generated by `stepsFor(finding)` detailing sandbox initialization, Scope Guard invocation, and execution of the standalone replay script.
+- **Business Impact:** Looked up via `IMPACT[finding.cia]` providing realistic impact descriptions across Confidentiality, Integrity, and Availability without hyperbolic financial claims.
+- **Proof-of-Concept Oracle:** Looked up via `STRAT_ORACLE[finding.strategy]` stating the exact deterministic condition proving the weakness.
+
+---
+
+## 5. Audit Log Schema (`AUDIT`)
+
+Simulates the append-only SHA-256 hash-chain required by **PRD §18.3**:
+
+```javascript
+{
+  seq: 1,                          // Sequence number
+  type: "authorization_loaded",    // Event type
+  actor: "analyst:vikram",         // Responsible actor
+  ts: "09:58:02",                  // Timestamp
+  p: "signed artifact 7f21…",      // Event payload summary
+  h: "a91c"                        // SHA-256 hash prefix
+}
+```
