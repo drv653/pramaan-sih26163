@@ -1,0 +1,10 @@
+# Set default behaviour to automatically normalize line endings
+* text=auto eol=lf
+
+# Explicit binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.svg text
+*.pdf binary
+*.ico binary
